@@ -27,8 +27,8 @@ resource "aws_cloudfront_distribution" "main" {
     origin_id   = "alb-origin"
 
     custom_origin_config {
-      http_port              = 80
-      https_port             = 443
+      http_port  = 80
+      https_port = 443
       # The ALB listener is HTTP only (no ACM certificate without a domain),
       # so CloudFront must speak HTTP to the origin. With a domain this
       # becomes "https-only" and the whole path is encrypted.

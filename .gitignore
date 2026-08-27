@@ -5,8 +5,11 @@
 *.tfstate
 *.tfstate.*
 *.tfstate.backup
+
+# NOTE: .terraform.lock.hcl is deliberately NOT ignored. It pins the exact
+# provider versions so every clone resolves identically, and it contains no
+# secrets. HashiCorp recommends committing it.
 .terraform/
-.terraform.lock.hcl
 crash.log
 crash.*.log
 

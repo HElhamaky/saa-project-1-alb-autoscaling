@@ -50,7 +50,7 @@ output "dashboard_url" {
 
 output "demo_commands" {
   description = "Copy-paste commands for the evidence capture session."
-  value = <<-EOT
+  value       = <<-EOT
 
     ── Connect to an instance (no SSH key, no bastion) ──────────────────
     aws ssm start-session --target $(aws ec2 describe-instances \

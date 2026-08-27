@@ -68,7 +68,7 @@ resource "aws_db_instance" "main" {
   storage_type          = "gp3"
   # Encrypted with the AWS-managed key (aws/rds). Customer-managed KMS keys
   # are a Project 8 concern; this project uses the free default key.
-  storage_encrypted     = true
+  storage_encrypted = true
 
   db_name  = var.db_name
   username = var.db_username
