@@ -39,8 +39,10 @@ resource "aws_db_subnet_group" "main" {
 }
 
 resource "aws_db_parameter_group" "main" {
-  name_prefix = "${local.name}-mysql8-" # name_prefix pairs with create_before_destroy
-  family = "mysql8.0"
+  # name_prefix, not name: pairs with create_before_destroy below so a change
+  # to the parameters does not fail on a duplicate-name error.
+  name_prefix = "${local.name}-mysql8-"
+  family      = "mysql8.0"
 
   # Force TLS for every client connection - encryption in transit at the
   # database tier - enforced by the database itself, not merely requested by
