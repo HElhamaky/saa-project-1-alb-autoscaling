@@ -468,6 +468,7 @@ This section is worth more than it looks. Graders read it first.
 
 - [`docs/terraform-outputs.txt`](docs/terraform-outputs.txt) — outputs from the live deployment
 - [`docs/terraform-resources.txt`](docs/terraform-resources.txt) — full resource inventory
+- [`docs/VERIFICATION.md`](docs/VERIFICATION.md) — live test results from the deployed stack, with the commands to reproduce them
 - [`docs/screenshots/`](docs/screenshots/) — 13 captured artifacts
 
 ---

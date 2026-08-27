@@ -85,8 +85,13 @@ resource "aws_cloudwatch_metric_alarm" "rds_cpu" {
   alarm_description   = "Database CPU sustained above 80%"
   alarm_actions       = [aws_sns_topic.alerts.arn]
 
+  # .identifier, NOT .id. On aws_db_instance the `id` attribute is the DBI
+  # RESOURCE id (db-FFVIESG6QV7...), while the CloudWatch dimension wants the
+  # instance identifier (saa-capstone-mysql). Using `id` here is silent: the
+  # alarm creates fine and then sits in INSUFFICIENT_DATA forever, because
+  # that dimension value has no metrics behind it.
   dimensions = {
-    DBInstanceIdentifier = aws_db_instance.main.id
+    DBInstanceIdentifier = aws_db_instance.main.identifier
   }
 }
 
@@ -182,7 +187,7 @@ resource "aws_cloudwatch_dashboard" "main" {
           region = var.aws_region
           view   = "timeSeries"
           metrics = [
-            ["AWS/RDS", "CPUUtilization", "DBInstanceIdentifier", aws_db_instance.main.id],
+            ["AWS/RDS", "CPUUtilization", "DBInstanceIdentifier", aws_db_instance.main.identifier],
             [".", "DatabaseConnections", ".", "."],
             [".", "FreeStorageSpace", ".", ".", { yAxis = "right" }]
           ]

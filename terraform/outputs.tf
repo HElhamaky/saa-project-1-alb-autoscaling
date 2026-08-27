@@ -62,7 +62,7 @@ output "demo_commands" {
     sudo /usr/local/bin/burn-cpu.sh 420
 
     ── Force an RDS Multi-AZ failover ───────────────────────────────────
-    aws rds reboot-db-instance --db-instance-identifier ${aws_db_instance.main.id} --force-failover
+    aws rds reboot-db-instance --db-instance-identifier ${aws_db_instance.main.identifier} --force-failover
 
     ── Prove CloudFront caches static assets but not dynamic HTML ───────
     # dynamic: x-cache should say "Miss from cloudfront" every time

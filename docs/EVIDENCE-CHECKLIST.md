@@ -75,12 +75,37 @@ Expect **HTTP 403** with your custom message body.
 📸 `07-alb-listener-rule.png`
 
 ### 6. WAF blocking SQL injection
-```bash
-curl -i "http://<alb-dns>/?id=1%27%20OR%20%271%27=%271"
-```
-Expect **HTTP 403** with `server: awselb`.
 
-📸 `11-waf-block-curl.png`
+> **Run this from inside the VPC, not from your laptop.** Running it locally
+> returned `curl: (52) Empty reply from server` with no HTTP status at all -
+> the request was dropped by something on the client network (antivirus web
+> shield, corporate inspection, ISP DPI) *before it reached AWS*. WAF's
+> sampled-request log confirmed the malicious request never arrived, while a
+> benign one did. A real WAF block always returns a clean `403`; a
+> connection-level failure means the test never got there.
+
+```bash
+aws ssm start-session --target <instance-id>
+H=http://<alb-dns>
+curl -s -o /dev/null -w 'sqli=%{http_code}
+'      "$H/?id=1%27%20OR%20%271%27=%271"
+curl -s -o /dev/null -w 'xss=%{http_code}
+'       "$H/?q=%3Cscript%3Ealert(1)%3C%2Fscript%3E"
+curl -s -o /dev/null -w 'traversal=%{http_code}
+' "$H/?f=..%2F..%2Fetc%2Fpasswd"
+curl -s -o /dev/null -w 'benign=%{http_code}
+'    "$H/?id=hello"
+```
+
+Expect `403` for the three attacks and `200` for the benign control. Including
+the control is what makes the screenshot persuasive - it shows WAF
+discriminating, not merely refusing everything.
+
+📸 `11-waf-block-curl.png` - all four lines in one frame.
+
+Cross-check in CloudWatch: `AWS/WAFV2 BlockedRequests` should equal the number
+of *attack* probes only. `/admin` is blocked by the ALB listener rule, not
+WAF, so it must not appear in that count.
 
 ### 7. CloudFront cache behaviour — run each curl TWICE
 ```bash
