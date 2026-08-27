@@ -1,0 +1,16 @@
+# Default: let Git normalise text in the repository.
+* text=auto
+
+# user-data.sh is base64-encoded by Terraform and executed by cloud-init on
+# Amazon Linux. CRLF line endings would leave a stray \r on every command and
+# break the bootstrap in a way that is genuinely painful to diagnose - the
+# instance boots, passes its EC2 status check, and simply never serves a page.
+# Force LF regardless of the platform Terraform is run from.
+*.sh text eol=lf
+
+# Keep Terraform sources consistent for everyone.
+*.tf   text eol=lf
+*.tfvars text eol=lf
+
+# Treat the diagram as text so it stays diffable.
+*.svg  text eol=lf

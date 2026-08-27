@@ -1,0 +1,37 @@
+# ---- Terraform ------------------------------------------------------------
+# State contains the generated RDS master password in plaintext. It must never
+# be committed. Production would use an encrypted S3 backend with DynamoDB
+# locking instead of local state - see README §Production deltas.
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+crash.log
+crash.*.log
+
+# Variable files may carry an email address or a domain.
+*.tfvars
+*.tfvars.json
+!terraform.tfvars.example
+
+# Saved plans can contain the same secrets as state.
+tfplan
+*.tfplan
+
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# ---- Local ----------------------------------------------------------------
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# ---- Course material ------------------------------------------------------
+# The project brief is someone else's document. Kept locally, not published.
+SAA - Projects Ideas.pdf
+*.pdf

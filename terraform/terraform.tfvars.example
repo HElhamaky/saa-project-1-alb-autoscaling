@@ -1,0 +1,22 @@
+# Copy to terraform.tfvars and edit. terraform.tfvars is gitignored.
+
+aws_region   = "us-east-1"
+project_name = "saa-capstone"
+owner        = "san"
+
+# Optional: get CloudWatch alarms by email. Leave "" to skip.
+# You must click the confirmation link AWS emails you.
+alert_email = ""
+
+# CloudFront sits in front of the ALB. Costs nothing meaningful at demo
+# volumes, but adds ~8 min to BOTH apply and destroy. Set false if the clock
+# is against you - the README documents the design either way.
+enable_cloudfront = true
+
+# Optional Route 53 alias record + health check. Requires an existing PUBLIC
+# hosted zone. Leave both "" to skip and use the ALB DNS name directly.
+domain_name    = ""
+hosted_zone_id = ""
+
+# Set to false to halve RDS cost if you decide to skip the failover demo.
+db_multi_az = true

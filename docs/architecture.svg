@@ -1,0 +1,215 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 910" width="1240" height="910" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<defs>
+  <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M0 0 L10 5 L0 10 z" fill="#37474f"/>
+  </marker>
+  <marker id="ad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M0 0 L10 5 L0 10 z" fill="#78909c"/>
+  </marker>
+  <style>
+    .t   { font-size:13px; fill:#102027; }
+    .tb  { font-size:13px; fill:#102027; font-weight:600; }
+    .sm  { font-size:11px; fill:#546e7a; }
+    .smb { font-size:11px; fill:#37474f; font-weight:600; }
+    .lbl { font-size:11px; fill:#37474f; }
+    .cid { font-size:11px; fill:#546e7a; font-family:ui-monospace,Consolas,monospace; }
+    .ctr { font-size:12px; font-weight:700; letter-spacing:.04em; }
+    .ln  { stroke:#37474f; stroke-width:1.6; fill:none; marker-end:url(#a); }
+    .lnd { stroke:#78909c; stroke-width:1.4; fill:none; stroke-dasharray:5 4; marker-end:url(#ad); }
+    .note{ font-size:10.5px; fill:#b71c1c; }
+  </style>
+</defs>
+
+<rect width="1240" height="910" fill="#ffffff"/>
+
+<text x="620" y="30" class="tb" font-size="19" text-anchor="middle">Scalable Web Application &#8212; ALB, Auto Scaling &amp; Multi-AZ RDS</text>
+<text x="620" y="50" class="sm" text-anchor="middle">Project 1 &#183; Region us-east-1 &#183; VPC 10.0.0.0/16 &#183; two Availability Zones &#183; every compute resource in a private subnet</text>
+
+<!-- ============================ EDGE BAND ============================ -->
+<rect x="20" y="78" width="80" height="56" rx="6" fill="#eceff1" stroke="#607d8b" stroke-width="1.5"/>
+<text x="60" y="105" class="t" text-anchor="middle">User</text>
+<text x="60" y="121" class="sm" text-anchor="middle">browser</text>
+
+<rect x="135" y="78" width="120" height="56" rx="6" fill="#f5f5f5" stroke="#8e24aa" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="195" y="99" class="t" text-anchor="middle">Route 53</text>
+<text x="195" y="114" class="sm" text-anchor="middle">ALIAS + health check</text>
+<text x="195" y="128" class="sm" text-anchor="middle" font-style="italic">not applied</text>
+
+<rect x="295" y="78" width="120" height="56" rx="6" fill="#ede7f6" stroke="#5e35b1" stroke-width="1.5"/>
+<text x="355" y="99" class="t" text-anchor="middle">CloudFront</text>
+<text x="355" y="114" class="sm" text-anchor="middle">edge cache</text>
+<text x="355" y="128" class="sm" text-anchor="middle">PriceClass_100</text>
+
+<rect x="475" y="78" width="110" height="56" rx="6" fill="#ffebee" stroke="#c62828" stroke-width="1.5"/>
+<text x="530" y="99" class="t" text-anchor="middle">WAF v2</text>
+<text x="530" y="114" class="sm" text-anchor="middle">rate limit &#8594; OWASP</text>
+<text x="530" y="128" class="sm" text-anchor="middle">&#8594; SQLi &#8594; bad inputs</text>
+
+<line x1="100" y1="106" x2="133" y2="106" class="ln"/>
+<line x1="255" y1="106" x2="293" y2="106" class="lnd"/>
+<line x1="415" y1="106" x2="473" y2="106" class="ln"/>
+<text x="444" y="99" class="lbl" text-anchor="middle">HTTPS</text>
+<text x="444" y="120" class="lbl" text-anchor="middle">:443</text>
+
+<text x="355" y="152" class="note" text-anchor="middle">/static/* &#8594; CachingOptimized &#160;&#183;&#160; * &#8594; CachingDisabled</text>
+<text x="355" y="165" class="note" text-anchor="middle">caching dynamic HTML would pin every user to one instance</text>
+
+<!-- ============================ AWS CLOUD ============================ -->
+<rect x="30" y="175" width="1180" height="540" rx="8" fill="none" stroke="#232f3e" stroke-width="2"/>
+<text x="44" y="194" class="ctr" fill="#232f3e">AWS CLOUD &#183; us-east-1</text>
+
+<!-- VPC -->
+<rect x="55" y="210" width="935" height="470" rx="6" fill="none" stroke="#8c4fff" stroke-width="2"/>
+<text x="68" y="228" class="ctr" fill="#8c4fff">VPC</text>
+<text x="103" y="228" class="cid" fill="#8c4fff">10.0.0.0/16</text>
+
+<!-- IGW straddling the VPC boundary -->
+<rect x="475" y="190" width="110" height="40" rx="5" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.5"/>
+<text x="530" y="207" class="t" text-anchor="middle">Internet</text>
+<text x="530" y="221" class="t" text-anchor="middle">Gateway</text>
+
+<line x1="530" y1="134" x2="530" y2="188" class="ln"/>
+<line x1="530" y1="230" x2="530" y2="298" class="ln"/>
+<text x="540" y="268" class="lbl">HTTP :80 to origin</text>
+
+<!-- AZ containers -->
+<rect x="75" y="250" width="445" height="395" rx="5" fill="none" stroke="#0277bd" stroke-width="1.3" stroke-dasharray="7 5"/>
+<text x="75" y="244" class="ctr" fill="#0277bd">AVAILABILITY ZONE us-east-1a</text>
+<rect x="540" y="250" width="435" height="395" rx="5" fill="none" stroke="#0277bd" stroke-width="1.3" stroke-dasharray="7 5"/>
+<text x="540" y="244" class="ctr" fill="#0277bd">AVAILABILITY ZONE us-east-1b</text>
+
+<!-- PUBLIC tier -->
+<rect x="90" y="285" width="415" height="90" rx="4" fill="#e3f2fd" stroke="#1565c0" stroke-width="1.2"/>
+<text x="98" y="300" class="smb" fill="#1565c0">PUBLIC</text>
+<text x="152" y="300" class="cid">10.0.1.0/24</text>
+<rect x="555" y="285" width="405" height="90" rx="4" fill="#e3f2fd" stroke="#1565c0" stroke-width="1.2"/>
+<text x="563" y="300" class="smb" fill="#1565c0">PUBLIC</text>
+<text x="617" y="300" class="cid">10.0.2.0/24</text>
+
+<rect x="105" y="308" width="150" height="45" rx="5" fill="#fff8e1" stroke="#f57f17" stroke-width="1.5"/>
+<text x="180" y="326" class="t" text-anchor="middle">NAT Gateway</text>
+<text x="180" y="341" class="sm" text-anchor="middle">single, shared</text>
+<text x="180" y="368" class="note" text-anchor="middle">one NAT, not one per AZ &#8212; documented cost tradeoff</text>
+
+<rect x="290" y="308" width="500" height="45" rx="5" fill="#fce4ec" stroke="#ad1457" stroke-width="1.8"/>
+<text x="540" y="326" class="tb" text-anchor="middle">Application Load Balancer &#160;(internet-facing, Layer 7)</text>
+<text x="540" y="341" class="sm" text-anchor="middle">listener :80 &#8594; target group &#183; health check GET /health &#183; rule 10: /admin* &#8594; fixed 403</text>
+
+<!-- APP tier -->
+<rect x="90" y="400" width="415" height="95" rx="4" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.2"/>
+<text x="98" y="415" class="smb" fill="#2e7d32">PRIVATE &#183; APP</text>
+<text x="184" y="415" class="cid">10.0.11.0/24</text>
+<rect x="555" y="400" width="405" height="95" rx="4" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.2"/>
+<text x="563" y="415" class="smb" fill="#2e7d32">PRIVATE &#183; APP</text>
+<text x="649" y="415" class="cid">10.0.12.0/24</text>
+
+<rect x="195" y="410" width="690" height="77" rx="6" fill="none" stroke="#00695c" stroke-width="1.6" stroke-dasharray="8 5"/>
+<text x="530" y="437" class="tb" text-anchor="middle" fill="#00695c">Auto Scaling Group</text>
+<text x="530" y="453" class="sm" text-anchor="middle">min 2 &#183; desired 2 &#183; max 4</text>
+<text x="530" y="468" class="sm" text-anchor="middle">target tracking: CPU 50% + 1000 req/target</text>
+
+<rect x="205" y="420" width="170" height="55" rx="5" fill="#ffffff" stroke="#2e7d32" stroke-width="1.5"/>
+<text x="290" y="440" class="t" text-anchor="middle">EC2 &#183; nginx</text>
+<text x="290" y="455" class="sm" text-anchor="middle">no public IP</text>
+<text x="290" y="468" class="sm" text-anchor="middle">IMDSv2 required</text>
+
+<rect x="705" y="420" width="170" height="55" rx="5" fill="#ffffff" stroke="#2e7d32" stroke-width="1.5"/>
+<text x="790" y="440" class="t" text-anchor="middle">EC2 &#183; nginx</text>
+<text x="790" y="455" class="sm" text-anchor="middle">no public IP</text>
+<text x="790" y="468" class="sm" text-anchor="middle">IMDSv2 required</text>
+
+<!-- DATA tier -->
+<rect x="90" y="520" width="415" height="105" rx="4" fill="#f3e5f5" stroke="#6a1b9a" stroke-width="1.2"/>
+<text x="98" y="535" class="smb" fill="#6a1b9a">PRIVATE &#183; DATA</text>
+<text x="190" y="535" class="cid">10.0.21.0/24</text>
+<rect x="555" y="520" width="405" height="105" rx="4" fill="#f3e5f5" stroke="#6a1b9a" stroke-width="1.2"/>
+<text x="563" y="535" class="smb" fill="#6a1b9a">PRIVATE &#183; DATA</text>
+<text x="655" y="535" class="cid">10.0.22.0/24</text>
+
+<rect x="205" y="545" width="170" height="52" rx="5" fill="#ffffff" stroke="#6a1b9a" stroke-width="1.5"/>
+<text x="290" y="563" class="t" text-anchor="middle">RDS MySQL</text>
+<text x="290" y="578" class="sm" text-anchor="middle">PRIMARY &#183; writer</text>
+<text x="290" y="591" class="sm" text-anchor="middle">encrypted at rest</text>
+
+<rect x="705" y="545" width="170" height="52" rx="5" fill="#fafafa" stroke="#6a1b9a" stroke-width="1.5" stroke-dasharray="4 3"/>
+<text x="790" y="563" class="t" text-anchor="middle">RDS MySQL</text>
+<text x="790" y="578" class="sm" text-anchor="middle">STANDBY &#183; serves</text>
+<text x="790" y="591" class="sm" text-anchor="middle">no traffic</text>
+
+<text x="290" y="616" class="note" text-anchor="middle">route table has the local route only &#8212; no NAT, no IGW</text>
+<text x="757" y="616" class="note" text-anchor="middle">NACL: 3306 from app tier + all traffic data&#8596;data</text>
+
+<!-- sync replication (double line) -->
+<line x1="378" y1="565" x2="698" y2="565" stroke="#6a1b9a" stroke-width="1.4"/>
+<line x1="378" y1="570" x2="698" y2="570" stroke="#6a1b9a" stroke-width="1.4"/>
+<path d="M702 567.5 L690 561 L690 574 z" fill="#6a1b9a"/>
+<text x="538" y="558" class="lbl" text-anchor="middle" fill="#6a1b9a">synchronous replication &#183; RPO 0 &#183; RTO 60&#8211;120s</text>
+
+<!-- ============================ TRAFFIC ARROWS ============================ -->
+<line x1="290" y1="353" x2="290" y2="418" class="ln"/>
+<text x="298" y="378" class="lbl">:80</text>
+<text x="298" y="392" class="lbl">src = alb-sg</text>
+
+<line x1="790" y1="353" x2="790" y2="418" class="ln"/>
+<text x="798" y="378" class="lbl">:80</text>
+<text x="798" y="392" class="lbl">src = alb-sg</text>
+
+<line x1="290" y1="477" x2="290" y2="543" class="ln"/>
+<text x="300" y="516" class="lbl">:3306 &#183; src = app-sg &#183; TLS required</text>
+
+<path d="M790 477 L790 507 L345 507 L345 543" class="ln"/>
+<text x="600" y="502" class="lbl" text-anchor="middle">both AZs write to the single writer endpoint</text>
+
+<path d="M205 447 L180 447 L180 355" class="ln"/>
+<path d="M180 306 L180 268 L500 268 L500 232" class="ln"/>
+<text x="336" y="263" class="lbl" text-anchor="middle">outbound only &#8212; patching, SSM, Secrets Manager</text>
+
+<text x="290" y="489" class="note" text-anchor="middle">no port 22 ingress anywhere in this architecture</text>
+
+<!-- ============================ MANAGEMENT COLUMN ============================ -->
+<rect x="1030" y="250" width="165" height="62" rx="5" fill="#e0f7fa" stroke="#00838f" stroke-width="1.4"/>
+<text x="1112" y="270" class="t" text-anchor="middle">Systems Manager</text>
+<text x="1112" y="286" class="sm" text-anchor="middle">Session Manager</text>
+<text x="1112" y="300" class="sm" text-anchor="middle">no port 22 &#183; no bastion</text>
+
+<rect x="1030" y="330" width="165" height="62" rx="5" fill="#fff3e0" stroke="#ef6c00" stroke-width="1.4"/>
+<text x="1112" y="350" class="t" text-anchor="middle">Secrets Manager</text>
+<text x="1112" y="366" class="sm" text-anchor="middle">RDS master password</text>
+<text x="1112" y="380" class="sm" text-anchor="middle">read at runtime by role</text>
+
+<rect x="1030" y="410" width="165" height="62" rx="5" fill="#e8eaf6" stroke="#3949ab" stroke-width="1.4"/>
+<text x="1112" y="430" class="t" text-anchor="middle">CloudWatch</text>
+<text x="1112" y="446" class="sm" text-anchor="middle">dashboard + 4 alarms</text>
+<text x="1112" y="460" class="sm" text-anchor="middle">ALB &#183; ASG &#183; RDS &#183; WAF</text>
+
+<rect x="1030" y="490" width="165" height="52" rx="5" fill="#e8eaf6" stroke="#3949ab" stroke-width="1.4"/>
+<text x="1112" y="512" class="t" text-anchor="middle">SNS</text>
+<text x="1112" y="528" class="sm" text-anchor="middle">email notification</text>
+
+<rect x="1030" y="560" width="165" height="52" rx="5" fill="#eceff1" stroke="#546e7a" stroke-width="1.4"/>
+<text x="1112" y="582" class="t" text-anchor="middle">VPC Flow Logs</text>
+<text x="1112" y="598" class="sm" text-anchor="middle">REJECT traffic only</text>
+
+<line x1="1112" y1="472" x2="1112" y2="488" class="ln"/>
+<path d="M1030 281 L1016 281 L1016 432 L878 432" class="lnd"/>
+<path d="M1030 361 L1006 361 L1006 462 L878 462" class="lnd"/>
+
+<!-- ============================ LEGEND ============================ -->
+<rect x="30" y="740" width="1180" height="145" rx="6" fill="#fafafa" stroke="#cfd8dc" stroke-width="1.2"/>
+<text x="46" y="762" class="ctr" fill="#37474f">LEGEND</text>
+
+<line x1="50" y1="783" x2="105" y2="783" stroke="#37474f" stroke-width="1.6"/>
+<text x="115" y="787" class="t">deployed and verified in a live account</text>
+<line x1="50" y1="806" x2="105" y2="806" stroke="#78909c" stroke-width="1.4" stroke-dasharray="5 4"/>
+<text x="115" y="810" class="t">written but not applied &#8212; Route 53 alias, ACM / HTTPS (no registered domain)</text>
+<line x1="50" y1="827" x2="105" y2="827" stroke="#6a1b9a" stroke-width="1.4"/>
+<line x1="50" y1="832" x2="105" y2="832" stroke="#6a1b9a" stroke-width="1.4"/>
+<text x="115" y="834" class="t">synchronous replication between the Multi-AZ pair</text>
+<text x="50" y="860" class="sm">Security group chain: internet &#8594; alb-sg &#8594; app-sg &#8594; rds-sg. Every rule references a source SECURITY GROUP, never a CIDR block.</text>
+
+<text x="660" y="787" class="smb">Why the tiers are separated this way</text>
+<text x="660" y="806" class="sm">PUBLIC &#8212; the only tier reachable from the internet. Holds the ALB and the NAT Gateway, nothing else.</text>
+<text x="660" y="823" class="sm">APP &#8212; outbound internet via NAT only. Nothing on the internet can open a connection to an instance.</text>
+<text x="660" y="840" class="sm">DATA &#8212; no route to a NAT Gateway or an IGW at all. A compromised database has no path to exfiltrate over.</text>
+<text x="660" y="862" class="sm">CloudFront and Route 53 are global services, drawn outside both the region and the VPC boundary.</text>
+</svg>
