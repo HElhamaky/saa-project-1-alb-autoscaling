@@ -1,6 +1,6 @@
 # Live verification results
 
-Captured against the deployed stack on **2026-08-27**, region `us-east-1`,
+Captured against the deployed stack on **2026-08-27 / 28**, region `us-east-1`,
 account `074189218557`. Every result below is reproducible with the commands
 shown — they are the same ones `terraform output demo_commands` prints.
 
@@ -127,12 +127,91 @@ and every session is logged.
 
 ---
 
+## 6. RDS Multi-AZ forced failover
+
+```bash
+curl -s http://<alb-dns>/dbstatus.txt          # capture BEFORE - unrecoverable after
+aws rds reboot-db-instance --db-instance-identifier saa-capstone-mysql --force-failover
+```
+
+| | Before | After |
+|---|---|---|
+| Database server hostname | `ip-172-16-5-83` | `ip-172-16-1-167` |
+| Primary AZ | `us-east-1a` | `us-east-1b` |
+| Standby AZ | `us-east-1b` | `us-east-1a` |
+
+The AZs swapped, which is the point: the standby was promoted in place and the
+old primary became the new standby. The endpoint DNS name never changed, so
+the application needed no reconfiguration - that is what the writer endpoint
+buys you.
+
+### Measured failover duration: 38.7 seconds
+
+From the RDS event log:
+
+```
+15:37:12.882  Multi-AZ instance failover started.
+15:37:28.177  DB instance restarted
+15:37:51.533  Multi-AZ instance failover completed
+```
+
+`15:37:51.533 - 15:37:12.882 = 38.7s`, comfortably inside the 60-120s RTO that
+AWS documents. Measured end to end from the API call at `15:37:01`, it was
+50.5 seconds.
+
+The app tier observed the change between `15:38:39` (still reporting the old
+host) and `15:39:44` (reporting the new one). That gap reflects the **probe's
+own 2-minute timer**, not database downtime - a useful reminder that your
+observation interval sets a floor on how precisely you can measure an outage.
+
+## 7. Auto Scaling under load
+
+```bash
+aws ssm send-command --instance-ids <both ids> --document-name AWS-RunShellScript   --parameters 'commands=["setsid nohup /usr/local/bin/burn-cpu.sh 1200 >/dev/null 2>&1 </dev/null &"]'
+```
+
+| Event | Time (UTC) | Elapsed from load start |
+|---|---|---|
+| CPU load started on both instances | `15:36:12` | - |
+| `saa-capstone-asg-high-cpu` alarm -> ALARM | `15:39:44` | 3m 32s |
+| Target-tracking policy fired, desired 2 -> 4 | `15:40:41` | 4m 29s |
+| Both new instances launched | `15:40:55` | 4m 43s |
+| All 4 instances InService | `15:41:53` | **5m 41s** |
+
+```
+At 2026-08-28T15:40:41Z a monitor alarm TargetTracking-...-AlarmHigh in state
+ALARM triggered policy saa-capstone-cpu-target-50 changing the desired
+capacity from 2 to 4.
+```
+
+Note the policy jumped straight from 2 to 4 rather than stepping. Target
+tracking computes the capacity needed to reach the target rather than nudging
+by a fixed increment: with two instances pinned near 100% against a 50%
+target, the required capacity is `2 x (100/50) = 4`. Step scaling would have
+added one instance at a time and taken far longer to converge.
+
+The new instances landed one per AZ, so the group stayed balanced at 2+2
+without anyone asking for it.
+
+### The alarm cleared while the load was still running
+
+The alarm returned to OK at `15:48:24`, roughly eight minutes before the CPU
+burn was due to end. That is not a fault - it is the control loop converging.
+Only the two original instances were burning CPU; the two new ones were idle.
+Average CPU across the group became `(100 + 100 + 0 + 0) / 4 = 50%`, which is
+exactly the target. The system stopped scaling because it had arrived, and
+watching the arithmetic land on the target value is the clearest possible
+demonstration of what "target tracking" actually means.
+
+Full minute-by-minute timeline: [`evidence-timeline.txt`](evidence-timeline.txt)
+
+---
+
 ## Not yet captured
 
-- Auto Scaling reacting to the CPU target-tracking policy
-  (`/usr/local/bin/burn-cpu.sh`)
-- RDS Multi-AZ forced failover, before/after `dbstatus.txt` hostname change
-- CloudWatch dashboard with the CPU spike and capacity increase in one frame
-- SNS alarm notification email
-
-See [`EVIDENCE-CHECKLIST.md`](EVIDENCE-CHECKLIST.md).
+- Console screenshots (see [`EVIDENCE-CHECKLIST.md`](EVIDENCE-CHECKLIST.md))
+- SNS alarm notification email - the subscription was still
+  `PendingConfirmation` when the CPU alarm fired, so no email was delivered.
+  An unconfirmed SNS subscription drops notifications silently.
+- Scale-in after the load stops (target tracking waits out a cooldown before
+  removing capacity)

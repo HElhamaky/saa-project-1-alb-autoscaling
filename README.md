@@ -179,7 +179,14 @@ returning different instance IDs in different AZs.
 📸 `docs/screenshots/05-rds-failover-events.png` — a forced failover
 completing.
 
-> `TODO: state the measured failover duration from the event log timestamps.`
+**Measured failover: 38.7 seconds.** From the RDS event log —
+`Multi-AZ instance failover started` at `15:37:12.882`, `completed` at
+`15:37:51.533`. Measured from the API call itself it was 50.5 seconds. Both
+sit inside the 60–120s RTO AWS documents.
+
+After the failover the **AZs had swapped** (primary `us-east-1a` → `us-east-1b`),
+and the endpoint DNS name never changed — the application needed no
+reconfiguration. See [`docs/VERIFICATION.md`](docs/VERIFICATION.md) §6.
 
 ## Scaling
 
@@ -204,7 +211,20 @@ scaled in finishes its in-flight requests rather than dropping them.
 📸 `docs/screenshots/09-cloudwatch-dashboard.png` — CPU spike and capacity
 increase in one frame.
 
-> `TODO: how long from CPU breach to the new instance passing health checks?`
+**5 minutes 41 seconds** from load start to all four instances `InService`:
+alarm to ALARM at 3m 32s, target-tracking policy fired at 4m 29s, instances
+launched at 4m 43s, all healthy at 5m 41s.
+
+The policy jumped **straight from 2 to 4**, not 2→3→4. Target tracking solves
+for the capacity that reaches the target — two instances near 100% against a
+50% target implies `2 × (100/50) = 4` — where step scaling would have
+incremented and converged far more slowly.
+
+The alarm then returned to `OK` *while the load was still running*, because
+average CPU across four instances (two burning, two idle) is exactly 50% —
+the target. Watching the arithmetic land on the target value is the clearest
+demonstration of what target tracking does. See
+[`docs/VERIFICATION.md`](docs/VERIFICATION.md) §7.
 
 ## Load balancing
 
