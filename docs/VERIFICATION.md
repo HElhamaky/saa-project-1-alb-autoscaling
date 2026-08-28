@@ -159,6 +159,16 @@ From the RDS event log:
 AWS documents. Measured end to end from the API call at `15:37:01`, it was
 50.5 seconds.
 
+> **Reading the screenshot against these numbers.** The RDS console renders
+> event times to the MINUTE and in the browser's local timezone. In
+> `05-rds-failover-events.png` all four events therefore read `18:37
+> (UTC+03:00)` - the same instant as `15:37 UTC` here, and with the seconds
+> rounded away. The console screenshot establishes the ordering and that the
+> whole failover fits inside one minute; the sub-second figures above come
+> from `aws rds describe-events`, recorded verbatim in
+> [`evidence-timeline.txt`](evidence-timeline.txt). Every time in this
+> document is UTC.
+
 The app tier observed the change between `15:38:39` (still reporting the old
 host) and `15:39:44` (reporting the new one). That gap reflects the **probe's
 own 2-minute timer**, not database downtime - a useful reminder that your
