@@ -223,11 +223,68 @@ The group ended balanced at one instance per AZ without intervention.
 
 Full minute-by-minute timeline: [`evidence-timeline.txt`](evidence-timeline.txt)
 
+## 8. SNS alarm notifications - and the bug that hid them
+
+Alarms fired correctly through an entire scaling demo and **no email ever
+arrived**. Two independent faults were stacked on the same path, which is why
+the symptom looked like one thing.
+
+### Fault 1: CloudWatch could not publish at all
+
+The topic was encrypted with the AWS-managed key `alias/aws/sns`. To publish
+to an SSE-enabled topic the *publisher* needs `kms:Decrypt` and
+`kms:GenerateDataKey*` on the key - but that key grants only
+`sns.amazonaws.com`, and **an AWS-managed key policy cannot be edited**. Every
+notification died at KMS before SNS ever saw it.
+
+The alarm history said only:
+
+```
+Failed to execute action arn:aws:sns:...:saa-capstone-alerts
+```
+
+The decisive evidence was the topic's own counters: `NumberOfMessagesPublished`
+was **zero**. Not "published but undelivered" - nothing had reached SNS.
+
+**Fix:** a customer-managed KMS key whose policy grants
+`cloudwatch.amazonaws.com` the two actions the AWS-managed key withholds. See
+`aws_kms_key.sns` in `monitoring.tf`.
+
+### Fault 2: the subscription was never confirmed
+
+The confirmation emails *were* sent - SNS reported 2 delivered, 0 failed - but
+they went to Gmail's **spam** folder, and were being looked for in a different
+mailbox (the root account address rather than the `alert_email` address). An
+unconfirmed SNS subscription discards messages silently.
+
+### Verified after both fixes
+
+```
+Successfully executed action arn:aws:sns:...:saa-capstone-alerts
+```
+
+| Counter | Before | After |
+|---|---|---|
+| `NumberOfMessagesPublished` | 0 | 2 |
+| `NumberOfNotificationsDelivered` | 0 | 2 |
+| `NumberOfNotificationsFailed` | 0 | 0 |
+
+### The generalisable lesson
+
+The symptom was identical both times - "no email" - but the cause was on
+opposite sides of SNS, and only one metric pair could tell them apart:
+
+- `Published = 0` -> the failure is **upstream** of SNS (the publisher cannot
+  reach the topic)
+- `Published > 0, Delivered = 0` -> the failure is **downstream** (the topic
+  has no confirmed subscriber)
+
+When a notification pipeline is silent, do not guess at the ends. Find the
+metric that splits it in the middle. Fixing only the visible problem - the
+pending subscription - would have produced exactly the same silence.
+
 ---
 
 ## Not yet captured
 
 - Console screenshots (see [`EVIDENCE-CHECKLIST.md`](EVIDENCE-CHECKLIST.md))
-- SNS alarm notification email - the subscription was still
-  `PendingConfirmation` when the CPU alarm fired, so no email was delivered.
-  An unconfirmed SNS subscription drops notifications silently.

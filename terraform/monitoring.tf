@@ -2,9 +2,74 @@
 # Observability: SNS + CloudWatch alarms + a single dashboard.
 ###############################################################################
 
+###############################################################################
+# KMS key for the alerts topic.
+#
+# WHY A CUSTOMER-MANAGED KEY IS REQUIRED HERE, and not merely preferred:
+#
+# To publish to an SSE-enabled SNS topic, the PUBLISHER needs kms:Decrypt and
+# kms:GenerateDataKey* on the topic's key. The AWS-managed key `alias/aws/sns`
+# grants only sns.amazonaws.com, and an AWS-managed key policy CANNOT be
+# edited. So a CloudWatch alarm pointed at an aws/sns-encrypted topic fails at
+# the KMS step - before SNS ever sees the message.
+#
+# The failure is silent and easy to misread. The alarm history says only
+# "Failed to execute action", and the giveaway is that the topic's
+# NumberOfMessagesPublished stays at ZERO - not "published but not delivered".
+# Published-vs-delivered is the metric pair that separates "the publisher
+# cannot reach the topic" from "the topic has no confirmed subscriber".
+#
+# This was found the hard way: alarms fired correctly for a full scaling demo
+# and no email ever arrived.
+###############################################################################
+
+resource "aws_kms_key" "sns" {
+  description             = "${local.name} - encrypts the CloudWatch alerts SNS topic"
+  enable_key_rotation     = true
+  deletion_window_in_days = 7 # 7 is the minimum AWS allows
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        # Without this the key becomes unmanageable - the same trap as the SNS
+        # topic policy below.
+        Sid       = "EnableAccountAdministration"
+        Effect    = "Allow"
+        Principal = { AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root" }
+        Action    = "kms:*"
+        Resource  = "*"
+      },
+      {
+        # The statement the AWS-managed key is missing.
+        Sid       = "AllowCloudWatchAlarmsToUseTheKey"
+        Effect    = "Allow"
+        Principal = { Service = "cloudwatch.amazonaws.com" }
+        Action    = ["kms:Decrypt", "kms:GenerateDataKey*"]
+        Resource  = "*"
+      },
+      {
+        # SNS itself needs the key to decrypt on delivery.
+        Sid       = "AllowSNSToUseTheKey"
+        Effect    = "Allow"
+        Principal = { Service = "sns.amazonaws.com" }
+        Action    = ["kms:Decrypt", "kms:GenerateDataKey*"]
+        Resource  = "*"
+      },
+    ]
+  })
+
+  tags = { Name = "${local.name}-sns-key" }
+}
+
+resource "aws_kms_alias" "sns" {
+  name          = "alias/${local.name}-sns"
+  target_key_id = aws_kms_key.sns.key_id
+}
+
 resource "aws_sns_topic" "alerts" {
   name              = "${local.name}-alerts"
-  kms_master_key_id = "alias/aws/sns"
+  kms_master_key_id = aws_kms_key.sns.id
 
   tags = { Name = "${local.name}-alerts" }
 }

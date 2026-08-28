@@ -47,11 +47,51 @@ resource "aws_route53_health_check" "app" {
 # no-domain build.
 ###############################################################################
 
+# KMS keys are regional, so the us-east-1 topic needs its own key with the same
+# CloudWatch grant. See the long note in monitoring.tf for why the AWS-managed
+# alias/aws/sns key silently breaks alarm notifications.
+resource "aws_kms_key" "sns_us_east_1" {
+  count                   = local.route53_enabled ? 1 : 0
+  provider                = aws.us_east_1
+  description             = "${local.name} - encrypts the us-east-1 Route 53 alerts topic"
+  enable_key_rotation     = true
+  deletion_window_in_days = 7
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid       = "EnableAccountAdministration"
+        Effect    = "Allow"
+        Principal = { AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root" }
+        Action    = "kms:*"
+        Resource  = "*"
+      },
+      {
+        Sid       = "AllowCloudWatchAlarmsToUseTheKey"
+        Effect    = "Allow"
+        Principal = { Service = "cloudwatch.amazonaws.com" }
+        Action    = ["kms:Decrypt", "kms:GenerateDataKey*"]
+        Resource  = "*"
+      },
+      {
+        Sid       = "AllowSNSToUseTheKey"
+        Effect    = "Allow"
+        Principal = { Service = "sns.amazonaws.com" }
+        Action    = ["kms:Decrypt", "kms:GenerateDataKey*"]
+        Resource  = "*"
+      },
+    ]
+  })
+
+  tags = { Name = "${local.name}-sns-key-use1" }
+}
+
 resource "aws_sns_topic" "alerts_us_east_1" {
   count             = local.route53_enabled ? 1 : 0
   provider          = aws.us_east_1
   name              = "${local.name}-alerts-use1"
-  kms_master_key_id = "alias/aws/sns"
+  kms_master_key_id = aws_kms_key.sns_us_east_1[0].id
 
   tags = { Name = "${local.name}-alerts-use1" }
 }
