@@ -89,7 +89,7 @@
 <rect x="105" y="308" width="150" height="45" rx="5" fill="#fff8e1" stroke="#f57f17" stroke-width="1.5"/>
 <text x="180" y="326" class="t" text-anchor="middle">NAT Gateway</text>
 <text x="180" y="341" class="sm" text-anchor="middle">single, shared</text>
-<text x="180" y="368" class="note" text-anchor="middle">one NAT, not one per AZ &#8212; documented cost tradeoff</text>
+<text x="300" y="368" class="note" text-anchor="middle">one NAT, not one per AZ &#8212; documented cost tradeoff</text>
 
 <rect x="290" y="308" width="500" height="45" rx="5" fill="#fce4ec" stroke="#ad1457" stroke-width="1.8"/>
 <text x="540" y="326" class="tb" text-anchor="middle">Application Load Balancer &#160;(internet-facing, Layer 7)</text>
@@ -103,20 +103,20 @@
 <text x="563" y="415" class="smb" fill="#2e7d32">PRIVATE &#183; APP</text>
 <text x="649" y="415" class="cid">10.0.12.0/24</text>
 
-<rect x="195" y="410" width="690" height="77" rx="6" fill="none" stroke="#00695c" stroke-width="1.6" stroke-dasharray="8 5"/>
-<text x="530" y="437" class="tb" text-anchor="middle" fill="#00695c">Auto Scaling Group</text>
-<text x="530" y="453" class="sm" text-anchor="middle">min 2 &#183; desired 2 &#183; max 4</text>
-<text x="530" y="468" class="sm" text-anchor="middle">target tracking: CPU 50% + 1000 req/target</text>
+<rect x="195" y="422" width="690" height="68" rx="6" fill="none" stroke="#00695c" stroke-width="1.6" stroke-dasharray="8 5"/>
+<text x="530" y="441" class="tb" text-anchor="middle" fill="#00695c">Auto Scaling Group</text>
+<text x="530" y="458" class="sm" text-anchor="middle">min 2 &#183; desired 2 &#183; max 4</text>
+<text x="530" y="474" class="sm" text-anchor="middle">target tracking: CPU 50% + 1000 req/target</text>
 
-<rect x="205" y="420" width="170" height="55" rx="5" fill="#ffffff" stroke="#2e7d32" stroke-width="1.5"/>
-<text x="290" y="440" class="t" text-anchor="middle">EC2 &#183; nginx</text>
-<text x="290" y="455" class="sm" text-anchor="middle">no public IP</text>
-<text x="290" y="468" class="sm" text-anchor="middle">IMDSv2 required</text>
+<rect x="205" y="428" width="170" height="50" rx="5" fill="#ffffff" stroke="#2e7d32" stroke-width="1.5"/>
+<text x="290" y="445" class="t" text-anchor="middle">EC2 &#183; nginx</text>
+<text x="290" y="459" class="sm" text-anchor="middle">no public IP</text>
+<text x="290" y="472" class="sm" text-anchor="middle">IMDSv2 required</text>
 
-<rect x="705" y="420" width="170" height="55" rx="5" fill="#ffffff" stroke="#2e7d32" stroke-width="1.5"/>
-<text x="790" y="440" class="t" text-anchor="middle">EC2 &#183; nginx</text>
-<text x="790" y="455" class="sm" text-anchor="middle">no public IP</text>
-<text x="790" y="468" class="sm" text-anchor="middle">IMDSv2 required</text>
+<rect x="705" y="428" width="170" height="50" rx="5" fill="#ffffff" stroke="#2e7d32" stroke-width="1.5"/>
+<text x="790" y="445" class="t" text-anchor="middle">EC2 &#183; nginx</text>
+<text x="790" y="459" class="sm" text-anchor="middle">no public IP</text>
+<text x="790" y="472" class="sm" text-anchor="middle">IMDSv2 required</text>
 
 <!-- DATA tier -->
 <rect x="90" y="520" width="415" height="105" rx="4" fill="#f3e5f5" stroke="#6a1b9a" stroke-width="1.2"/>
@@ -146,25 +146,24 @@
 <text x="538" y="558" class="lbl" text-anchor="middle" fill="#6a1b9a">synchronous replication &#183; RPO 0 &#183; RTO 60&#8211;120s</text>
 
 <!-- ============================ TRAFFIC ARROWS ============================ -->
-<line x1="290" y1="353" x2="290" y2="418" class="ln"/>
+<line x1="290" y1="353" x2="290" y2="426" class="ln"/>
 <text x="298" y="378" class="lbl">:80</text>
 <text x="298" y="392" class="lbl">src = alb-sg</text>
 
-<line x1="790" y1="353" x2="790" y2="418" class="ln"/>
+<line x1="790" y1="353" x2="790" y2="426" class="ln"/>
 <text x="798" y="378" class="lbl">:80</text>
 <text x="798" y="392" class="lbl">src = alb-sg</text>
 
-<line x1="290" y1="477" x2="290" y2="543" class="ln"/>
+<line x1="290" y1="480" x2="290" y2="543" class="ln"/>
 <text x="300" y="516" class="lbl">:3306 &#183; src = app-sg &#183; TLS required</text>
 
-<path d="M790 477 L790 507 L345 507 L345 543" class="ln"/>
+<path d="M790 480 L790 507 L345 507 L345 543" class="ln"/>
 <text x="600" y="502" class="lbl" text-anchor="middle">both AZs write to the single writer endpoint</text>
 
-<path d="M205 447 L180 447 L180 355" class="ln"/>
+<path d="M205 453 L180 453 L180 355" class="ln"/>
 <path d="M180 306 L180 268 L500 268 L500 232" class="ln"/>
 <text x="336" y="263" class="lbl" text-anchor="middle">outbound only &#8212; patching, SSM, Secrets Manager</text>
 
-<text x="290" y="489" class="note" text-anchor="middle">no port 22 ingress anywhere in this architecture</text>
 
 <!-- ============================ MANAGEMENT COLUMN ============================ -->
 <rect x="1030" y="250" width="165" height="62" rx="5" fill="#e0f7fa" stroke="#00838f" stroke-width="1.4"/>
@@ -191,8 +190,8 @@
 <text x="1112" y="598" class="sm" text-anchor="middle">REJECT traffic only</text>
 
 <line x1="1112" y1="472" x2="1112" y2="488" class="ln"/>
-<path d="M1030 281 L1016 281 L1016 432 L878 432" class="lnd"/>
-<path d="M1030 361 L1006 361 L1006 462 L878 462" class="lnd"/>
+<path d="M1030 281 L1016 281 L1016 441 L878 441" class="lnd"/>
+<path d="M1030 361 L1006 361 L1006 465 L878 465" class="lnd"/>
 
 <!-- ============================ LEGEND ============================ -->
 <rect x="30" y="740" width="1180" height="145" rx="6" fill="#fafafa" stroke="#cfd8dc" stroke-width="1.2"/>
@@ -205,7 +204,7 @@
 <line x1="50" y1="827" x2="105" y2="827" stroke="#6a1b9a" stroke-width="1.4"/>
 <line x1="50" y1="832" x2="105" y2="832" stroke="#6a1b9a" stroke-width="1.4"/>
 <text x="115" y="834" class="t">synchronous replication between the Multi-AZ pair</text>
-<text x="50" y="860" class="sm">Security group chain: internet &#8594; alb-sg &#8594; app-sg &#8594; rds-sg. Every rule references a source SECURITY GROUP, never a CIDR block.</text>
+<text x="50" y="876" class="sm">Security group chain: internet &#8594; alb-sg &#8594; app-sg &#8594; rds-sg &#183; every rule references a source SECURITY GROUP, never a CIDR block &#183; no port 22 ingress anywhere in this architecture.</text>
 
 <text x="660" y="787" class="smb">Why the tiers are separated this way</text>
 <text x="660" y="806" class="sm">PUBLIC &#8212; the only tier reachable from the internet. Holds the ALB and the NAT Gateway, nothing else.</text>

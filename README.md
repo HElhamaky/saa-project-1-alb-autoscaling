@@ -100,6 +100,7 @@ Being explicit about scope is more useful than pretending it was larger.
 │   └── user-data.sh             instance bootstrap
 └── docs/
     ├── architecture.svg         the diagram (SVG, renders inline on GitHub)
+    ├── architecture.png         the same diagram rendered at 2x, for slides/print
     ├── RUNBOOK.md               deploy / verify / destroy
     ├── DIAGRAM-SPEC.md
     ├── EVIDENCE-CHECKLIST.md
