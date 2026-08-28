@@ -7,7 +7,7 @@ with your real resource IDs already filled in.
 instant ones while you wait.
 
 Save screenshots to `docs/screenshots/` using the exact filenames given.
-**Target: 13 screenshots.**
+**Target: 14 screenshots** (15 files - `05b` is a bonus).
 
 ---
 
@@ -159,4 +159,4 @@ terraform state list > ../docs/terraform-resources.txt
 Both are cheap, both look thorough, and `terraform state list` shows the full
 resource inventory without pasting state.
 
-Count your screenshots. **You want 13.** Then destroy.
+Count your screenshots. **You want 14.** Then destroy.
