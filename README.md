@@ -2,7 +2,7 @@
 
 **AWS Solutions Architect – Associate — Graduation Project**
 **Project 1 — EC2-based architecture**
-Author: San · Submitted: `TODO: date`
+Author: Hassan Samy · Submitted: `TODO: date`
 
 A production-shaped, highly available web application on AWS: EC2 instances in
 an Auto Scaling Group behind an Application Load Balancer, inside a

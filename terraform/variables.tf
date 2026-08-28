@@ -19,7 +19,7 @@ variable "environment" {
 variable "owner" {
   description = "Owner tag - put your name here."
   type        = string
-  default     = "san"
+  default     = "Hassan Samy"
 }
 
 variable "vpc_cidr" {

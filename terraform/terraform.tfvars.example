@@ -2,7 +2,7 @@
 
 aws_region   = "us-east-1"
 project_name = "saa-capstone"
-owner        = "san"
+owner        = "Hassan Samy"
 
 # Optional: get CloudWatch alarms by email. Leave "" to skip.
 # You must click the confirmation link AWS emails you.
