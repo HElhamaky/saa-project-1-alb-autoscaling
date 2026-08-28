@@ -203,6 +203,24 @@ exactly the target. The system stopped scaling because it had arrived, and
 watching the arithmetic land on the target value is the clearest possible
 demonstration of what "target tracking" actually means.
 
+### Scale-in: 4 -> 3 -> 2, one instance at a time
+
+Once the load stopped, the group returned to its baseline:
+
+```
+16:12:46  AlarmLow triggered saa-capstone-cpu-target-50, desired 4 -> 3
+16:13:19  AlarmLow triggered saa-capstone-cpu-target-50, desired 3 -> 2
+```
+
+Note the asymmetry against the scale-out, which went straight from 2 to 4 in a
+single step. **Scaling out is aggressive; scaling in is deliberate.** Removing
+capacity too eagerly risks thrashing - terminating an instance only to need it
+again a minute later - and every termination costs a warm-up on the way back.
+Being wrong about scale-out costs money; being wrong about scale-in costs
+availability, so AWS treats the two directions differently.
+
+The group ended balanced at one instance per AZ without intervention.
+
 Full minute-by-minute timeline: [`evidence-timeline.txt`](evidence-timeline.txt)
 
 ---
@@ -213,5 +231,3 @@ Full minute-by-minute timeline: [`evidence-timeline.txt`](evidence-timeline.txt)
 - SNS alarm notification email - the subscription was still
   `PendingConfirmation` when the CPU alarm fired, so no email was delivered.
   An unconfirmed SNS subscription drops notifications silently.
-- Scale-in after the load stops (target tracking waits out a cooldown before
-  removing capacity)
