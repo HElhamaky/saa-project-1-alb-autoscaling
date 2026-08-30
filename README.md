@@ -472,16 +472,77 @@ Settings that are deliberately wrong for a demo and would be inverted for real:
 
 # What I would do differently
 
-> `TODO: write 3-5 honest bullets after the build. Candidates:`
-> - `deploy AWS Budgets before anything else`
-> - `use an S3 remote backend from the start rather than local state`
-> - `the require_secure_transport parameter change needs a reboot to apply —`
->   `plan for it rather than discovering it`
-> - `CloudFront's apply and destroy times dominate the feedback loop —`
->   `develop with it disabled, enable it last`
-> - `what actually broke, and how you diagnosed it`
+Four things broke during this build. **Every one of them failed silently** —
+`terraform validate` passed, `terraform plan` passed, and every resource was
+created successfully. Not one surfaced as an error. That is the thread running
+through all of them, and it is the most useful thing I take away.
 
-This section is worth more than it looks. Graders read it first.
+### 1. Encrypting the SNS topic disabled the alerting it was meant to protect
+
+I set `kms_master_key_id = "alias/aws/sns"` on the alerts topic because
+encryption at rest is obviously good. But publishing to an SSE-enabled topic
+requires the *publisher* to hold `kms:Decrypt` and `kms:GenerateDataKey*` on
+the key — and the AWS-managed key grants only `sns.amazonaws.com`, with a key
+policy that **cannot be edited**. Every CloudWatch alarm notification died at
+KMS before SNS ever saw it.
+
+Alarms fired correctly through an entire scaling demo and no email arrived.
+The fix was a customer-managed key granting `cloudwatch.amazonaws.com`. The
+lesson isn't really about KMS: **a hardening change can disable a control
+without reporting anything**, so a security change needs a functional test,
+not just a successful apply.
+
+### 2. `aws_db_instance.id` is not the database identifier
+
+I used it for the RDS alarm's `DBInstanceIdentifier` dimension. It returns the
+DBI *resource* id (`db-FFVIESG6QV7...`), not the instance identifier
+(`saa-capstone-mysql`). The alarm was created successfully and then sat in
+`INSUFFICIENT_DATA` permanently, watching a dimension with no metrics behind
+it. The dashboard's RDS panel was empty for the same reason.
+
+I only caught it by asking whether the alarm was receiving *data*, not whether
+it existed. `CPUUtilization` for the deployed dimension returned 0 datapoints;
+the correct identifier returned 5.
+
+### 3. The data-tier NACL forgot that Multi-AZ replication crosses subnets
+
+The NACL permitted MySQL from the app subnets plus the ephemeral return range
+— correct for application traffic, and it looked complete. But RDS Multi-AZ
+replicates synchronously from the primary in one data subnet to the standby in
+the other, and that traffic is evaluated by the same NACL. Without an explicit
+data-to-data rule the standby never syncs, and **RDS still reports the
+instance as `available`**.
+
+### 4. Test WAF from inside the VPC, not from a laptop
+
+My SQL-injection probe returned `curl: (52) Empty reply from server` — no HTTP
+status at all. I initially blamed WAF. Its sampled-request log showed the
+benign request arriving and being allowed, while the malicious one **never
+appeared at all**: client-side network inspection had dropped it before it
+left my machine. Re-run through SSM from inside the VPC, WAF returned clean
+403s.
+
+A real WAF block always returns an HTTP status. A connection-level failure
+means the test never got there.
+
+### What I would change about my process
+
+- **Verify function, not creation.** Four bugs, zero error messages. "The
+  resource exists" and "the resource works" are different claims, and only the
+  second one matters. The `/dbstatus.txt` probe exists for exactly this reason
+  — provisioning a database proves nothing about whether anything can reach it.
+- **Find the metric that splits a pipeline in half.** When no alert email
+  arrived, `NumberOfMessagesPublished = 0` proved the fault was *upstream* of
+  SNS. Had it been `Published > 0, Delivered = 0`, the unconfirmed subscription
+  would have been the whole story. Same symptom, opposite causes, and one
+  counter told them apart.
+- **Deploy AWS Budgets before anything else.** I tracked cost by reasoning
+  about it rather than by being told.
+- **Use an S3 remote backend from the start.** Local state was fine solo, but
+  it holds the generated database password in plaintext and is a single point
+  of loss.
+- **Develop with CloudFront disabled and enable it last.** Its apply and
+  destroy times dominate the feedback loop and slow every iteration.
 
 ---
 

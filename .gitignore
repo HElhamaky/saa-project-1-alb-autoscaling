@@ -18,9 +18,17 @@ crash.*.log
 *.tfvars.json
 !terraform.tfvars.example
 
-# Saved plans can contain the same secrets as state.
+# Saved plans embed a full copy of tfstate, so they contain every sensitive
+# value state does - including the generated RDS master password in plaintext.
+# Match by CONTENT-ish name, not by exact filename: an earlier version of this
+# file listed only `tfplan` and `*.tfplan`, and plans saved as `fixplan` and
+# `snsplan` were committed to a public repository as a result.
 tfplan
 *.tfplan
+*plan
+*plan.bin
+!*.tf
+!*.tfvars.example
 
 override.tf
 override.tf.json
