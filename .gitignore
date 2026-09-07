@@ -1,0 +1,59 @@
+# ---- Terraform ------------------------------------------------------------
+# State contains the generated RDS master password in plaintext. It must never
+# be committed. Production would use an encrypted S3 backend with DynamoDB
+# locking instead of local state - see README §Production deltas.
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+
+# NOTE: .terraform.lock.hcl is deliberately NOT ignored. It pins the exact
+# provider versions so every clone resolves identically, and it contains no
+# secrets. HashiCorp recommends committing it.
+.terraform/
+crash.log
+crash.*.log
+
+# Variable files may carry an email address or a domain.
+*.tfvars
+*.tfvars.json
+!terraform.tfvars.example
+
+# Saved plans embed a full copy of tfstate, so they contain every sensitive
+# value state does - including the generated RDS master password in plaintext.
+# Match by CONTENT-ish name, not by exact filename: an earlier version of this
+# file listed only `tfplan` and `*.tfplan`, and plans saved as `fixplan` and
+# `snsplan` were committed to a public repository as a result.
+# CONVENTION: always save plans as `terraform plan -out=tfplan`. Name-based
+# ignore rules cannot anticipate every filename - `fixplan` and `snsplan`
+# escaped a rule listing only `tfplan`, and `redeploy` later escaped `*plan`
+# too. The patterns below are a safety net, NOT the primary control. The
+# primary control is using one filename, every time.
+tfplan
+*.tfplan
+*plan
+*plan.bin
+redeploy*
+destroyplan*
+*.tfstate.backup
+!*.tf
+!*.tfvars.example
+
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# ---- Local ----------------------------------------------------------------
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# ---- Course material ------------------------------------------------------
+# The project brief is someone else's document. Kept locally, not published.
+SAA - Projects Ideas.pdf
+*.pdf
+
+# baseline captured at runtime, not committed
+docs/.failover-baseline.txt

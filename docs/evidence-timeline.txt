@@ -1,0 +1,30 @@
+=== TIMELINE (all times UTC) ===
+ts                    desired  inService  rdsStatus   cpuAlarm            dbstatus
+15:37:33              2        2          rebooting   OK                  ip-172-16-5-83
+15:38:39              2        2          available   OK                  ip-172-16-5-83
+15:39:44              2        2          available   ALARM               ip-172-16-1-167
+15:40:48              4        2          available   ALARM               ip-172-16-1-167
+15:41:53              4        4          available   ALARM               ip-172-16-1-167
+15:42:58              4        4          available   ALARM               ip-172-16-1-167
+15:44:02              4        4          available   ALARM               ip-172-16-1-167
+15:45:07              4        4          available   ALARM               ip-172-16-1-167
+15:46:12              4        4          available   ALARM               ip-172-16-1-167
+15:47:18              4        4          available   ALARM               ip-172-16-1-167
+15:48:24              4        4          available   OK                  ip-172-16-1-167
+15:49:32              4        4          available   OK                  ip-172-16-1-167
+15:50:40              4        4          available   OK                  ip-172-16-1-167
+15:51:47              4        4          available   OK                  ip-172-16-1-167
+15:52:53              4        4          available   OK                  ip-172-16-1-167
+
+=== RDS EVENTS ===
+2026-08-28T15:37:12.882000+00:00	Multi-AZ instance failover started. 
+2026-08-28T15:37:28.177000+00:00	DB instance restarted
+2026-08-28T15:37:51.533000+00:00	Multi-AZ instance failover completed
+2026-08-28T15:37:51.534000+00:00	The user requested a failover of the DB instance.
+
+=== ASG SCALING ACTIVITIES ===
+2026-08-28T15:40:55.035000+00:00	Successful	Launching a new EC2 instance: i-021ae14c7597a4b7f	At 2026-08-28T15:40:41Z a monitor alarm TargetTracking-saa-capstone-asg-2026082718400129890000000c-AlarmHigh-1831d9a1-94ac-4496-b3d1-3bf90bcf55f1 in state ALARM triggered policy saa-capstone-cpu-target-50 changing the desired capacity from 2 to 4.  At 2026-08-28T15:40:52Z an instance was started in response to a difference between desired and actual capacity, increasing the capacity from 2 to 4.
+2026-08-28T15:40:54.941000+00:00	Successful	Launching a new EC2 instance: i-0c906aa656d9065f9	At 2026-08-28T15:40:41Z a monitor alarm TargetTracking-saa-capstone-asg-2026082718400129890000000c-AlarmHigh-1831d9a1-94ac-4496-b3d1-3bf90bcf55f1 in state ALARM triggered policy saa-capstone-cpu-target-50 changing the desired capacity from 2 to 4.  At 2026-08-28T15:40:52Z an instance was started in response to a difference between desired and actual capacity, increasing the capacity from 2 to 4.
+2026-08-27T18:42:59.163000+00:00	Successful	Launching a new EC2 instance: i-0289948e305373af7	At 2026-08-27T18:40:03Z a user request created an AutoScalingGroup changing the desired capacity from 0 to 2.  At 2026-08-27T18:42:57Z an instance was started in response to a difference between desired and actual capacity, increasing the capacity from 0 to 2.
+2026-08-27T18:42:59.008000+00:00	Successful	Launching a new EC2 instance: i-07ecf47f4e60cffa5	At 2026-08-27T18:40:03Z a user request created an AutoScalingGroup changing the desired capacity from 0 to 2.  At 2026-08-27T18:42:57Z an instance was started in response to a difference between desired and actual capacity, increasing the capacity from 0 to 2.
+

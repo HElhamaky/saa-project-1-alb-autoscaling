@@ -1,0 +1,47 @@
+alb_dns_name = "saa-capstone-alb-53863651.us-east-1.elb.amazonaws.com"
+application_url = "http://saa-capstone-alb-53863651.us-east-1.elb.amazonaws.com"
+asg_name = "saa-capstone-asg-2026082718400129890000000c"
+cloudfront_url = "https://d15xnfb9akh70x.cloudfront.net"
+dashboard_url = "https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#dashboards:name=saa-capstone-overview"
+db_secret_name = "saa-capstone/rds/master-credentials"
+demo_commands = <<EOT
+
+── Connect to an instance (no SSH key, no bastion) ──────────────────
+aws ssm start-session --target $(aws ec2 describe-instances \
+  --filters "Name=tag:aws:autoscaling:groupName,Values=saa-capstone-asg-2026082718400129890000000c" \
+            "Name=instance-state-name,Values=running" \
+  --query 'Reservations[0].Instances[0].InstanceId' --output text)
+
+── Trigger a scale-out (run inside the session above) ───────────────
+sudo /usr/local/bin/burn-cpu.sh 420
+
+── Force an RDS Multi-AZ failover ───────────────────────────────────
+aws rds reboot-db-instance --db-instance-identifier db-FFVIESG6QV7DMUWZBHEXOCBZ4M --force-failover
+
+── Prove CloudFront caches static assets but not dynamic HTML ───────
+# dynamic: x-cache should say "Miss from cloudfront" every time
+curl -sI https://d15xnfb9akh70x.cloudfront.net/ | grep -i "x-cache"
+# static: run TWICE - second call should say "Hit from cloudfront"
+curl -sI https://d15xnfb9akh70x.cloudfront.net/static/logo.svg | grep -i "x-cache"
+
+── Prove the app tier actually reaches the Multi-AZ database ────────
+# expect: OK  endpoint=...  server=<hostname> 8.0.x 0  tls=enforced
+curl -s http://saa-capstone-alb-53863651.us-east-1.elb.amazonaws.com/dbstatus.txt
+# after a forced failover the server hostname changes - run it again
+
+── Prove WAF blocks SQL injection ───────────────────────────────────
+curl -i "http://saa-capstone-alb-53863651.us-east-1.elb.amazonaws.com/?id=1%27%20OR%20%271%27=%271"
+
+── Prove the ALB listener rule blocks /admin ────────────────────────
+curl -i "http://saa-capstone-alb-53863651.us-east-1.elb.amazonaws.com/admin"
+
+── Read the DB password from Secrets Manager ────────────────────────
+aws secretsmanager get-secret-value --secret-id saa-capstone/rds/master-credentials \
+  --query SecretString --output text
+
+
+EOT
+rds_endpoint = "saa-capstone-mysql.cwd4gkemut6h.us-east-1.rds.amazonaws.com:3306"
+rds_multi_az = true
+site_url = "(no domain configured - use application_url)"
+waf_web_acl = "saa-capstone-web-acl"
